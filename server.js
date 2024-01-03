@@ -46,37 +46,18 @@ app.get('/callback', async (req, res) => {
     }
 });
 
-app.get('/user/membership-types', async (req, res) => {
-    const accessToken = req.query.accessToken;
-    if (!accessToken) {
-        return res.status(400).send('Access token is required');
-    }
-
-    try {
-        const membershipResponse = await axios.get('https://www.bungie.net/Platform/User/GetMembershipsForCurrentUser/', {
-            headers: {
-                'X-API-Key': API_KEY,
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-        res.json(membershipResponse.data.Response.destinyMemberships);
-    } catch (error) {
-        console.error('Error fetching membership types:', error);
-        res.status(500).send('Error fetching membership types');
-    }
-});
-
-// Endpoint to fetch user's characters
+// Endpoint to fetch user's characters without needing to fetch membership type
 app.get('/user/characters', async (req, res) => {
     const membershipId = req.query.membershipId;
+    const characterId = req.query.characterId; // Added characterId parameter
     const accessToken = req.query.accessToken;
 
-    if (!membershipId || !accessToken) {
-        return res.status(400).send('Membership ID and Access token are required');
+    if (!membershipId || !characterId || !accessToken) {
+        return res.status(400).send('Membership ID, Character ID, and Access token are required');
     }
 
     try {
-        const charactersResponse = await axios.get(`https://www.bungie.net/Platform/Destiny2/1/Profile/${membershipId}/Characters/`, {
+        const charactersResponse = await axios.get(`https://www.bungie.net/Platform/Destiny2/1/Profile/${membershipId}/Character/${characterId}/`, {
             headers: {
                 'X-API-Key': API_KEY,
                 'Authorization': `Bearer ${accessToken}`
@@ -88,6 +69,7 @@ app.get('/user/characters', async (req, res) => {
         res.status(500).send('Error fetching characters');
     }
 });
+
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

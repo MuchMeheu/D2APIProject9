@@ -3,42 +3,29 @@ window.onload = function() {
     const accessToken = urlParams.get('accessToken');
 
     if (accessToken) {
-        fetchMembershipTypes(accessToken);
+        fetchCharacters(accessToken);
     }
 };
 
-function fetchMembershipTypes(accessToken) {
-    fetch(`/user/membership-types?accessToken=${accessToken}`)
-        .then(response => response.json())
-        .then(memberships => {
-            const userInfoDiv = document.getElementById('user-info');
-            memberships.forEach(membership => {
-                const button = document.createElement('button');
-                button.textContent = `Load ${membership.displayName}'s Data`;
-                button.onclick = () => fetchAndDisplayCharacters(membership.membershipId, accessToken);
-                userInfoDiv.appendChild(button);
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching membership types:', error);
-        });
-}
-
-function fetchAndDisplayCharacters(membershipId, accessToken) {
-    fetch(`/user/characters?membershipId=${membershipId}&accessToken=${accessToken}`)
+function fetchCharacters(accessToken) {
+    fetch(`/user/characters?accessToken=${accessToken}`)
         .then(response => response.json())
         .then(characters => {
-            // Process and display character data
-            const charactersDiv = document.createElement('div');
-            characters.forEach(character => {
-                const characterDiv = document.createElement('div');
-                characterDiv.textContent = `Character: ${character.characterName} - Class: ${character.class}`;
-                charactersDiv.appendChild(characterDiv);
+            const charactersDiv = document.getElementById('characters');
+            Object.keys(characters).forEach(characterId => {
+                const character = characters[characterId];
+                const button = document.createElement('button');
+                button.textContent = `Character: ${character.classType}`;
+                button.onclick = () => displayCharacter(character);
+                charactersDiv.appendChild(button);
             });
-            document.getElementById('user-info').appendChild(charactersDiv);
         })
         .catch(error => {
-            console.error('Error fetching character data:', error);
+            console.error('Error fetching characters:', error);
         });
 }
 
+function displayCharacter(character) {
+    const characterInfoDiv = document.getElementById('character-info');
+    characterInfoDiv.innerHTML = `Class: ${character.classType}<br>Light: ${character.light}<br>Race: ${character.raceType}`;
+}
